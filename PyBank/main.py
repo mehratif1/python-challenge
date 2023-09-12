@@ -1,55 +1,65 @@
-import os,csv
+import os
+import csv
 
-# Define the input file path
-infile="PyPoll\Resources\election_data.csv"
-
-#Initialize Variables
+csvpath = "PyBank\\Resources\\budget_data.csv"
 counter = 0
-candidates = []
-candidates_dict = {}
+total = 0
+previous_profit = None
+profit_changes=[]
+greatest_increase = 0
+greatest_decrease = 0
+greateat_increase_month = 0
+greatest_decrease_month = 0
 
-#Open the csv file
-with open(infile) as election_data:
-    reader = csv.reader(election_data)
-   
-   #Read the header row
-    header = next(reader)
-   
-# Loop through each row in the csv
-    for row in reader:
+
+
+with open(csvpath) as budget_data:
+    csvreader=csv.reader(budget_data)
+
+    #skipping the header row
+    csvheader = next(csvreader)
     
-       counter = counter + 1 
 
-       #check if the candidate name is already in the list, if not add it otherwise count it
-       if row[2] not in candidates:
-        candidates.append(row[2])
-        candidates_dict[row[2]] = 1
-      
-       else:
-        candidates_dict[row[2]] += 1
-      
+    for r in csvreader:
+        counter = counter + 1
+        total += int(r[1])
+        date = r[0]
 
-# Print the results
+        if previous_profit is not None:
+            change = int(r[1])-int(previous_profit)
+            profit_changes.append(change)
+
+            if change > greatest_increase:
+                greatest_increase = change
+                greatest_increase_month = date
+
+            elif change < greatest_decrease:
+                greatest_decrease = change
+                greatest_decrease_month = date
+
+
+        
+        previous_profit = r[1]
+    average_change = sum(profit_changes) / len(profit_changes)
+    
+        
+
+
+
 output=(
-f"Election Results\n"
-f"{'-' * 20 }\n"
-f"Total Votes:    {counter}\n"
-f"{'-' * 20}\n"
+    f"Financial Analysis\n"
+    f"{'-' * 20}\n"
+    f"Total Months: {counter}\n"
+    f"Total: $ {total}\n"
+    f"Average Change: $ {round(average_change,2)}\n"
+    f"Greatest Increase in Profit:   {greatest_increase_month}   ($  {greatest_increase})\n"
+    f"Greatest Decrease in Profits:  {greatest_decrease_month}   ($ {greatest_decrease})\n"
 )
-
-for candidate, votes in candidates_dict.items():
-    output += f"{candidate}: {votes / counter * 100:.3f}% ({votes})\n"
-    output += f"{'-' * 20}\n"     
-
-    #printing the winner 
-winner_name = max(candidates_dict, key=candidates_dict.get)
-output += f"Winner: {winner_name}\n"
-output += f"{'-' * 20}\n"
-
 
 print(output)
 
-with open("PyPoll/analysis/election_results.txt" , "w") as text_file:
+with open("PyBank/analysis/financial Analysis.txt" , "w") as text_file:
     text_file.write(output)
+
 
 
